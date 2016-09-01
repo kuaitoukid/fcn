@@ -157,6 +157,15 @@ void MultiscaleFuseLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
             int top_coord_index = 0;
             int right_coord_index = 0;
             int bottom_coord_index = 0;
+            
+            int top_left_coord_index = 0;
+            int left_top_coord_index = 0;
+            int top_right_coord_index = 0;
+            int right_top_coord_index = 0;
+            int bottom_right_coord_index = 0;
+            int right_bottom_coord_index = 0;
+            int bottom_left_coord_index = 0;
+            int left_bottom_coord_index = 0;
 
             Dtype left_in_image = 0;
             Dtype top_in_image = 0;
