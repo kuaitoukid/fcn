@@ -285,8 +285,8 @@ void DenseboxDataLayer<Dtype>::SetSampleScales(vector<std::pair<float, float> >&
         Dtype line12 = Distance(coords[key_point_[1] * 2], coords[key_point_[1] * 2 + 1], coords[key_point_[2] * 2], coords[key_point_[2] * 2 + 1]);
         Dtype line23 = Distance(coords[key_point_[2] * 2], coords[key_point_[2] * 2 + 1], coords[key_point_[3] * 2], coords[key_point_[3] * 2 + 1]);
         Dtype line30 = Distance(coords[key_point_[3] * 2], coords[key_point_[3] * 2 + 1], coords[key_point_[0] * 2], coords[key_point_[0] * 2 + 1]);
-        ori_bbox_width = max(line01, line23);
-        ori_bbox_height = max(line12, line30);
+        ori_bbox_width = (line01 + line23) / 2;
+        ori_bbox_height = (line12 + line30) / 2;
       } else {
         LOG(ERROR) << "Invalid regression point number.";
       }
@@ -524,8 +524,8 @@ void DenseboxDataLayer<Dtype>::SetTopSamples(Dtype* top_data, Dtype* top_label,
           Dtype line12 = Distance(coords[key_point_[1] * 2], coords[key_point_[1] * 2 + 1], coords[key_point_[2] * 2], coords[key_point_[2] * 2 + 1]);
           Dtype line23 = Distance(coords[key_point_[2] * 2], coords[key_point_[2] * 2 + 1], coords[key_point_[3] * 2], coords[key_point_[3] * 2 + 1]);
           Dtype line30 = Distance(coords[key_point_[3] * 2], coords[key_point_[3] * 2 + 1], coords[key_point_[0] * 2], coords[key_point_[0] * 2 + 1]);
-          bb_width = max(line01, line23);
-          bb_height = max(line12, line30);
+          bb_width = (line01 + line23) / 2;
+          bb_height = (line12 + line30) / 2;
           // bb_width = abs(int(coords[bid * num_anno_points_per_instance_ * 2 + key_point_[0] * 2]) - center_w) * 2;
           // bb_height = abs(int(coords[bid * num_anno_points_per_instance_ * 2 + key_point_[0] * 2 + 1]) - center_h) * 2;
           // bb_width = max(bb_width, abs(int(coords[bid * num_anno_points_per_instance_ * 2 + key_point_[1] * 2]) - center_w) * 2);
