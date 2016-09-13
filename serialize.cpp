@@ -48,6 +48,7 @@ class SerializeLayer : public Layer<Dtype> {
 #include "caffe/util/math_functions.hpp"
 
 namespace caffe {
+
 template <typename Dtype>
 void SerializeLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   const SerializeParameter& param = this->layer_param_.serialize_param();
@@ -55,28 +56,31 @@ void SerializeLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom, const
   axis_ = param.axis();
   CHECK_GE(axis_, 0) << "axis should be >= 0";
   CHECK_LE(axis_, 3) << "axis should be < 4";
-  stride_value_ = param.max_value() / bottom[0]->shape(axis_);
-  // Dtype* top_data = top[0]->mutable_cpu_data();
+  vector<int> top_shape(4, 1);
+  for (int i = 0; i < bottom[0]->num_axes(); i ++) {
+    top_shape[i] = bottom[0]->shape(i);
+  }
+
+  stride_value_ = param.max_value() / top_shape[axis_];
+
   serialize_data_ = new Dtype[bottom[0]->count()];
   int outer_duplicate_size = 1;
   int inner_duplicate_size = 1;
   for (int i = 0; i < axis_; i ++) {
-    outer_duplicate_size *= bottom[0]->shape(i);
+    outer_duplicate_size *= top_shape[i];
   }
   for (int i = 3; i > axis_; i --) {
-    inner_duplicate_size *= bottom[0]->shape(i);
+    inner_duplicate_size *= top_shape[i];
   }
-  int duplicate_data_size = inner_duplicate_size * bottom[0]->shape(axis_);
+  int duplicate_data_size = inner_duplicate_size * top_shape[axis_];
   Dtype* duplicate_data = new Dtype[duplicate_data_size];
-  
+
   for (int n = 0; n < outer_duplicate_size; n ++) {
-    for (int i = 0; i < bottom[0]->shape(axis_); i ++) {
+    for (int i = 0; i < top_shape[axis_]; i ++) {
       caffe_set(inner_duplicate_size, stride_value_ * (i + 1), duplicate_data + i * inner_duplicate_size);
     }
     caffe_copy(duplicate_data_size, duplicate_data, serialize_data_ + n * duplicate_data_size);
   }
-  
-  
 }
 
 template <typename Dtype>
