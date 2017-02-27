@@ -1,0 +1,164 @@
+name: "demo_net"
+layer {
+  name: "demo_data_layer"
+  type: "DemoDataLayer"
+  top: "data"
+  top: "label"
+}
+
+layer {
+  name: "mean-data"
+  type: "Power"
+  bottom: "data"
+  top: "mean-data"
+  power_param {
+    scale: 0.01
+    shift: -1.13
+    power: 1
+  }
+}
+
+layer {
+  name: "multi-task-label"
+  type: "Slice"
+  bottom: "label" # has 6 channels
+  top: "label-task0"
+  top: "label-task1"
+  top: "label-task2"
+  slice_param {
+    slice_point: 1
+    slice_point: 4
+  }
+}
+
+layer {
+  name: "conv"
+  type: "Convolution"
+  bottom: "mean-data"
+  top: "conv"
+  convolution_param {
+    num_output: 8
+    kernel_size: 3
+    pad: 2
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "crop"
+  type: "Crop"
+  bottom: "conv"
+  bottom: "label"
+  top: "crop"
+  crop_param {
+    axis: 2
+    offset: 1
+    offset: 1
+  }
+}
+
+layer {
+  name: "conv-task0"
+  type: "Convolution"
+  bottom: "crop"
+  top: "conv-task0"
+  convolution_param {
+    num_output: 1
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "conv-task1"
+  type: "Convolution"
+  bottom: "crop"
+  top: "conv-task1"
+  convolution_param {
+    num_output: 3
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "conv-task2"
+  type: "Convolution"
+  bottom: "crop"
+  top: "conv-task2"
+  convolution_param {
+    num_output: 2
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+
+layer {
+  name: "concat02"
+  type: "Concat"
+  bottom: "conv-task0"
+  bottom: "conv-task2"
+  top: "concat02"
+}
+
+layer {
+  name: "eltwise021"
+  type: "Eltwise"
+  bottom: "concat02"
+  bottom: "conv-task1"
+  top: "eltwise021"
+  eltwise_param {
+    operation: MAX
+  }
+}
+
+layer {
+  name: "l2loss0"
+  type: "EuclideanLoss"
+  bottom: "conv-task0"
+  bottom: "label-task0"
+  top: "l2loss0"
+  loss_weight: 0.1
+}
+
+layer {
+  name: "l2loss1"
+  type: "EuclideanLoss"
+  bottom: "eltwise021"
+  bottom: "label-task1"
+  top: "l2loss1"
+  loss_weight: 0.5
+}
+
+layer {
+  name: "l2loss2"
+  type: "EuclideanLoss"
+  bottom: "conv-task2"
+  bottom: "label-task2"
+  top: "l2loss2"
+  loss_weight: 1
+}
