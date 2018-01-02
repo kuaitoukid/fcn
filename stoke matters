@@ -1,2 +1,5 @@
 title stroke matters: torwards robust scene text feature extraction
-Deep convolutional neural networks have achieved signifiant improvements since the feature extraction could be completed automatically
+Deep convolutional neural networks have achieved signifiant improvements in many computer vision tasks and most works tends to explain the nature of CNN by visualization the extracted features.
+In this paper, we analyze the feature extraction process for scene text detection frameworks and point out the differences between general object and scene text.
+The text region feature are firstly turned to be negative and flatterned by the relu activation funtion
+point out the underlying inability of CNN in extracting robust scene text feature and propose the 
